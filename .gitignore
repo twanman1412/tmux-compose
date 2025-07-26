@@ -1,0 +1,24 @@
+# Temporary files
+*.tmp
+*.log
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local configuration (should use examples/)
+tmux-compose.json
+
+# Test directories
+test/
+tests/
+
+# Documentation builds
+docs/_build/

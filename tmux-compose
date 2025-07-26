@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+
+# tmux-compose - Better docker-compose with tmux integration
+# Version: 0.1.0
+
+set -euo pipefail
+
+# Script directory for loading libraries
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Load helper libraries
+source "${SCRIPT_DIR}/lib/utils.sh"
+source "${SCRIPT_DIR}/lib/config.sh"
+source "${SCRIPT_DIR}/lib/docker.sh"
+source "${SCRIPT_DIR}/lib/tmux.sh"
+
+# Default configuration
+DEFAULT_CONFIG_PATH="${HOME}/.config/tmux-compose/config.json"
+PROJECT_CONFIG_PATH="./tmux-compose.json"
+
+# Global variables
+CONFIG=""
+PROJECT_DIR=""
+PROJECT_NAME=""
+DOCKER_COMPOSE_FILE=""
+
+# Print usage information
+usage() {
+    cat << EOF
+tmux-compose - Better docker-compose with tmux integration
+
+Usage: tmux-compose [OPTIONS] COMMAND [ARGS...]
+
+Commands:
+    up [OPTIONS]        Create and start containers in tmux session
+    down [OPTIONS]      Stop and remove containers
+    ps                  List containers in tmux format
+    logs [SERVICE]      Show logs for services
+    exec SERVICE CMD    Execute command in service container
+    shell SERVICE       Open interactive shell in service container
+    
+    All other docker-compose commands are passed through
+
+Options:
+    -f, --file FILE     Specify alternate compose file
+    -p, --project NAME  Specify alternate project name
+    --config FILE       Specify alternate config file
+    -h, --help          Show this help message
+
+Examples:
+    tmux-compose up
+    tmux-compose up --build
+    tmux-compose logs web
+    tmux-compose shell web
+EOF
+}
+
+# Initialize project environment
+init_project() {
+    PROJECT_DIR="$(pwd)"
+    PROJECT_NAME="${PROJECT_NAME:-$(basename "$PROJECT_DIR")}"
+    
+    # Find docker-compose file
+    if [[ -n "${DOCKER_COMPOSE_FILE:-}" ]]; then
+        if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
+            error "Docker compose file not found: $DOCKER_COMPOSE_FILE"
+        fi
+    else
+        DOCKER_COMPOSE_FILE="$(find_compose_file)"
+        if [[ -z "$DOCKER_COMPOSE_FILE" ]]; then
+            error "No docker-compose.yml found in current directory or parents"
+        fi
+    fi
+    
+    # Load configuration
+    CONFIG="$(load_config)"
+    
+    log "Project: $PROJECT_NAME"
+    log "Compose file: $DOCKER_COMPOSE_FILE"
+}
+
+# Main command dispatcher
+main() {
+    local command=""
+    local docker_args=()
+    
+    # Parse global options
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            -f|--file)
+                DOCKER_COMPOSE_FILE="$2"
+                shift 2
+                ;;
+            -p|--project)
+                PROJECT_NAME="$2"
+                shift 2
+                ;;
+            --config)
+                CONFIG_FILE="$2"
+                shift 2
+                ;;
+            --debug)
+                export DEBUG=1
+                shift
+                ;;
+            -*)
+                docker_args+=("$1")
+                if [[ $# -gt 1 && ! "$2" =~ ^- ]]; then
+                    docker_args+=("$2")
+                    shift
+                fi
+                shift
+                ;;
+            *)
+                command="$1"
+                shift
+                break
+                ;;
+        esac
+    done
+    
+    if [[ -z "$command" ]]; then
+        usage
+        exit 1
+    fi
+    
+    # Initialize project
+    init_project
+    
+    # Handle tmux-integrated commands
+    case "$command" in
+        up)
+            tmux_compose_up "${docker_args[@]}" "$@"
+            ;;
+        down)
+            tmux_compose_down "${docker_args[@]}" "$@"
+            ;;
+        ps)
+            tmux_compose_ps "${docker_args[@]}" "$@"
+            ;;
+        logs)
+            tmux_compose_logs "${docker_args[@]}" "$@"
+            ;;
+        shell)
+            tmux_compose_shell "${docker_args[@]}" "$@"
+            ;;
+        *)
+            # Pass through to docker-compose
+            exec docker-compose -f "$DOCKER_COMPOSE_FILE" -p "$PROJECT_NAME" "${docker_args[@]}" "$command" "$@"
+            ;;
+    esac
+}
+
+# Run main function with all arguments
+main "$@"

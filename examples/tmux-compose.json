@@ -1,0 +1,12 @@
+{
+  "services": "pane",
+  "services_panes": 2,
+  "shell_access": "split",
+  "shell_priority": ["bash", "sh"],
+  "session_naming": "example-{project_name}",
+  "session_cleanup": "persist",
+  "split_direction": "vertical",
+  "keybinds": {
+    "shell_access": "Space"
+  }
+}
