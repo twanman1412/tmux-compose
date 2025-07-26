@@ -8,7 +8,7 @@ Instead of dealing with the chaotic merged output of `docker-compose up`, tmux-c
 
 - 🚀 **Organized Logs**: Each service gets its own tmux window or pane
 - 🔧 **Easy Shell Access**: Configurable keybind to open shell in current container
--   **Highly Configurable**: JSON configuration for layouts, keybinds, and behavior
+- ⚙ **Highly Configurable**: JSON configuration for layouts, keybinds, and behavior
 - 🔄 **Full docker-compose Compatibility**: All docker-compose commands work normally
 
 ## Quick Start
@@ -67,15 +67,15 @@ tmux-compose uses JSON configuration files with the following priority:
 
 ```json
 {
-  "services": "window|pane",           // How to organize services
-  "services_panes": 4,                 // Max panes per window (0 = unlimited)
-  "shell_access": "split|window",      // How to open container shells
-  "shell_priority": ["bash", "sh", "ash"], // Shell preference order
-  "session_naming": "{project_name}",  // Session name template
-  "session_cleanup": "quit|store|persist", // What to do when containers stop
-  "split_direction": "horizontal|vertical", // Split direction for shells
+  "services": "window|pane",                 // How to organize services
+  "services_panes": 4,                       // Max panes per window (0 = unlimited)
+  "shell_access": "split|window",            // How to open container shells
+  "shell_priority": ["bash", "sh", "ash"],   // Shell preference order
+  "session_naming": "{project_name}",        // Session name template
+  "session_cleanup": "quit|store|persist",   // What to do when containers stop
+  "split_direction": "horizontal|vertical",  // Split direction for shells
   "keybinds": {
-    "shell_access": "Space"             // Keybind for shell access
+    "shell_access": "Space"                  // Keybind for shell access
   }
 }
 ```
