@@ -178,6 +178,7 @@ Default install directory is `/usr/local/bin`.
 **Shell keybind not working:**
 - Verify tmux prefix key (default: Ctrl+B)
 - Check keybind configuration in tmux-compose.json
+- Note: Shell and restart keybinds currently only work in window mode, not pane mode
 
 **Missing dependencies:**
 - Run the installer again to check requirements
@@ -197,6 +198,7 @@ MIT License - see LICENSE file for details.
 
 ## Roadmap
 
+- [ ] **Proper pane mode support** - Fix shell access and restart keybinds to work with individual services in pane mode
 - [ ] **Log storage and replay functionality** - Save container logs to files and replay them later
 - [ ] **Support for docker-compose profiles** - Use `--profile` flag to activate specific service groups
 - [ ] **Advanced layout configurations** - Custom tmux layouts and window arrangements
