@@ -38,6 +38,7 @@ Commands:
     logs [SERVICE]      Show logs for services
     exec SERVICE CMD    Execute command in service container
     shell SERVICE       Open interactive shell in service container
+    restart SERVICE     Restart a specific service
     
     All other docker-compose commands are passed through
 
@@ -147,6 +148,9 @@ main() {
             ;;
         shell)
             tmux_compose_shell "${docker_args[@]}" "$@"
+            ;;
+        restart)
+            tmux_compose_restart "${docker_args[@]}" "$@"
             ;;
         *)
             # Pass through to docker-compose

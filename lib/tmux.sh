@@ -127,9 +127,13 @@ setup_tmux_session() {
 setup_keybindings() {
     local session_name="$1"
     local shell_keybind
-    shell_keybind="$(config_get "keybinds.shell_access" "C-s")"
+    shell_keybind="$(config_get "keybinds.shell_access" "Space")"
+    
+    local restart_keybind
+    restart_keybind="$(config_get "keybinds.restart_service" "r")"
     
     log "Setting up keybind: $shell_keybind for shell access"
+    log "Setting up keybind: $restart_keybind for service restart"
     
     # Get shell priority from config
     local shell_priority
@@ -173,7 +177,34 @@ setup_keybindings() {
         fi
     "
     
+    # Bind key to restart current service container
+    tmux bind-key "$restart_keybind" run-shell "
+        window_name=\$(tmux display-message -p '#W')
+        cd '$PROJECT_DIR'
+        container_id=\$(docker-compose -f '$DOCKER_COMPOSE_FILE' -p '$PROJECT_NAME' ps -q \"\$window_name\" 2>/dev/null | head -1)
+        if [ -n \"\$container_id\" ]; then
+            tmux display-message \"Restarting service: \$window_name...\"
+            # Restart the service in background
+            docker-compose -f '$DOCKER_COMPOSE_FILE' -p '$PROJECT_NAME' restart \"\$window_name\" >/dev/null 2>&1 &
+        else
+            # Check if service exists in compose file
+            if docker-compose -f '$DOCKER_COMPOSE_FILE' -p '$PROJECT_NAME' config --services 2>/dev/null | grep -q \"^\$window_name\$\"; then
+                tmux display-message \"Service \$window_name is not running, starting it...\"
+                # Start the service in background
+                docker-compose -f '$DOCKER_COMPOSE_FILE' -p '$PROJECT_NAME' start \"\$window_name\" >/dev/null 2>&1 &
+            else
+                tmux display-message \"Service '\$window_name' not found in docker-compose file\"
+                exit 0
+            fi
+        fi
+        # Clear the current window and restart logs
+        tmux send-keys C-c
+        sleep 1
+        tmux send-keys \"docker-compose -f '$DOCKER_COMPOSE_FILE' -p '$PROJECT_NAME' logs -f '\$window_name'\" C-m
+    "
+    
     log "Keybind: Ctrl+B then $shell_keybind for shell access"
+    log "Keybind: Ctrl+B then $restart_keybind for service restart"
 }
 
 # Open shell in service container
@@ -304,4 +335,19 @@ tmux_compose_shell() {
     fi
     
     open_service_shell "$service"
+}
+
+# Restart service container
+tmux_compose_restart() {
+    local service="$1"
+    
+    if [[ -z "$service" ]]; then
+        error "Service name required for restart command"
+    fi
+    
+    if ! service_exists "$service"; then
+        error "Service '$service' not found in docker-compose file"
+    fi
+    
+    docker_compose_restart "$service"
 }

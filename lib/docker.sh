@@ -131,3 +131,24 @@ docker_compose_ps() {
 docker_compose_logs() {
     docker-compose -f "$DOCKER_COMPOSE_FILE" -p "$PROJECT_NAME" logs "$@"
 }
+
+# Restart a specific service
+docker_compose_restart() {
+    local service="$1"
+    
+    if [[ -z "$service" ]]; then
+        error "Service name required for restart"
+    fi
+    
+    # Check if container is running
+    local container_id
+    container_id="$(get_container_id "$service")"
+    
+    if [[ -n "$container_id" ]]; then
+        log "Restarting service: $service"
+        docker-compose -f "$DOCKER_COMPOSE_FILE" -p "$PROJECT_NAME" restart "$service"
+    else
+        log "Service $service is not running, starting it instead"
+        docker-compose -f "$DOCKER_COMPOSE_FILE" -p "$PROJECT_NAME" start "$service"
+    fi
+}

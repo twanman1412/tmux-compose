@@ -1,5 +1,5 @@
 {
-  "services": "pane",
+  "services": "window",
   "services_panes": 2,
   "shell_access": "split",
   "shell_priority": ["bash", "sh"],
@@ -7,6 +7,7 @@
   "session_cleanup": "persist",
   "split_direction": "vertical",
   "keybinds": {
-    "shell_access": "Space"
+    "shell_access": "Space",
+    "restart_service": "r"
   }
 }

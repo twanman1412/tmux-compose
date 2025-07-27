@@ -46,11 +46,15 @@ tmux-compose logs web
 
 # Open shell in service container
 tmux-compose shell web
+
+# Restart a specific service (or start if not running)
+tmux-compose restart web
 ```
 
 ### Default Keybinds
 
 - `Ctrl+B + Space`: Open shell in current service container (configurable)
+- `Ctrl+B + R`: Restart current service container (or start if not running) (configurable)
 - `Ctrl+B + 0-9`: Switch between service windows
 - `Ctrl+B + arrow keys`: Navigate between panes
 - `Ctrl+B + d`: Detach from tmux session
@@ -75,7 +79,8 @@ tmux-compose uses JSON configuration files with the following priority:
   "session_cleanup": "quit|store|persist",   // What to do when containers stop
   "split_direction": "horizontal|vertical",  // Split direction for shells
   "keybinds": {
-    "shell_access": "Space"                  // Keybind for shell access
+    "shell_access": "Space",                 // Keybind for shell access
+    "restart_service": "r"                   // Keybind for service restart
   }
 }
 ```
