@@ -1,20 +1,23 @@
 CC := gcc
 CFLAGS := -Wall -Wextra -Werror
 TARGET := tmux-compose
+BUILD_DIR := build
+BIN := $(BUILD_DIR)/$(TARGET)
 
 CFILES := $(shell find . -type f -name '*.c')
 HFILES := $(shell find . -type f -name '*.h')
-OBJECTS := $(CFILES:.c=.o)
+OBJECTS := $(addprefix $(BUILD_DIR)/,$(CFILES:.c=.o))
 
-all: $(TARGET)
+all: $(BIN)
 
-$(TARGET): $(OBJECTS)
+$(BIN): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.o: %.c $(HFILES)
+$(BUILD_DIR)/%.o: %.c $(HFILES)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -rf $(BUILD_DIR)
 
 .PHONY: all clean

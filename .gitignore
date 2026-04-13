@@ -1,8 +1,5 @@
 # Ignore temporary files
 tmp/
 
-# Ignore object files
-*.o
-
-# Ignore compiled binaries
-tmux-compose
+# Ignore buidl files
+build/
