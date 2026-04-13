@@ -1,0 +1,10 @@
+services:
+  dummy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+
+  dummy2:
+    image: nginx:latest
+    ports:
+      - "8080:80"
